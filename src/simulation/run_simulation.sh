@@ -22,9 +22,10 @@ cd $currentdir
 # links executables
 mkdir -p bin
 cd bin/
-rm -f xmeshfem2D xspecfem2D
-ln -s ../../../bin/xmeshfem2D
-ln -s ../../../bin/xspecfem2D
+rm -f xmeshfem2D xspecfem2D xcheck_quality_external_mesh
+ln -s /home/obandohe/specfem2d/bin/xmeshfem2D
+ln -s /home/obandohe/specfem2d/bin/xspecfem2D
+ln -s /home/obandohe/specfem2d/bin/xcheck_quality_external_mesh
 cd ../
 
 # stores setup
@@ -74,7 +75,7 @@ cp DATA/*SOURCE* DATA/*STATIONS* OUTPUT_FILES
 # check mesh
 cd bin/
 rm -f xcheck_quality_external_mesh
-ln -s ../../../bin/xcheck_quality_external_mesh
+ln -s /home/obandohe/specfem2d/bin/xcheck_quality_external_mesh
 cd ../
 
 ./bin/xcheck_quality_external_mesh <<EOF

@@ -1,0 +1,66 @@
+# ==============================================================================
+# SPECFEM2D Source Configuration File
+# ==============================================================================
+# This YAML file contains all source parameters for generating
+# the SPECFEM2D SOURCE file
+
+# ==============================================================================
+# Source 1 - Location Parameters
+# ==============================================================================
+sources:
+  source_1:
+    # Source location
+    source_surf: false                      # source inside the medium, or source automatically moved exactly at the surface
+    xs: 5.0                               # source location x in meters
+    zs: 2.8                                # source location z in meters
+    
+    # Source type:
+    #  1 = elastic force or acoustic pressure
+    #  2 = moment tensor
+    # or Initial field type (when initialfield set in Par_file):
+    # For a plane wave including converted and reflected waves at the free surface:
+    #  1 = P wave, 2 = S wave, 3 = Rayleigh wave
+    # For a plane wave without converted nor reflected waves at the free surface:
+    #  4 = P wave, 5 = S wave
+    # For initial mode displacement:
+    #  6 = mode (2,3) of a rectangular membrane
+    source_type: 1                          # 1=force/pressure, 2=moment tensor
+    
+    # Source time function:
+    #  1 = second derivative of a Gaussian (Ricker)
+    #  2 = first derivative of a Gaussian
+    #  3 = Gaussian
+    #  4 = Dirac
+    #  5 = Heaviside
+    #  6 = ocean acoustics type I
+    #  7 = ocean acoustics type II
+    #  8 = external source time function (from file)
+    #  9 = burst
+    # 10 = Sinus source time function
+    # 11 = Marmousi Ormsby wavelet
+    time_function_type: 1                   # 1=Ricker, 2=1st derivative, 3=Gaussian, etc.
+    
+    # External source file (only for time_function_type == 8)
+    name_of_source_file: "YYYYYYYYYYYYYYYYYY"
+    
+    # Burst parameters (only for time_function_type == 9)
+    burst_band_width: 0.0
+    
+    # Dominant frequency parameters
+    f0: 200.0                                 # dominant source frequency (Hz)
+    tshift: 0.0                             # time shift when multi sources (must be zero for single source)
+    
+    # Force source parameters
+    anglesource: 0.0                        # angle of the source (for a force only)
+    
+    # Moment tensor components (in N.m)
+    mxx: 1.0                                # Mxx component
+    mzz: 1.0                                # Mzz component
+    mxz: 0.0                                # Mxz component
+    
+    # Amplification factor
+    factor: 1.0e10                          # amplification factor
+    
+    # Moving source parameters
+    vx: 0.0                                 # Horizontal source velocity (m/s)
+    vz: 0.0                                 # Vertical source velocity (m/s)

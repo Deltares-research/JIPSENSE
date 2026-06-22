@@ -1,0 +1,233 @@
+# ==============================================================================
+# SPECFEM2D Configuration File
+# ==============================================================================
+# This YAML file contains all configuration parameters for generating
+# the SPECFEM2D Par_file
+
+# ==============================================================================
+# Simulation & Time Parameters
+# ==============================================================================
+simulation:
+  title: "Test model for JIPSENSE"
+  simulation_type: 1              # 1=forward, 2=adjoint, 3=both
+  noise_tomography: 0             # 0=regular, 1/2/3=noise simulation
+  save_forward: false
+  nproc: 1                        # number of processes
+
+# ==============================================================================
+# Time Step Parameters
+# ==============================================================================
+time_parameters:
+  nstep: 500                      # total number of time steps
+  dt: 1.18e-5                     # duration of a time step
+  time_stepping_scheme: 1         # 1=Newmark, 2=LDDRK4-6, 3=classical RK4
+
+# ==============================================================================
+# Wave Type Parameters
+# ==============================================================================
+wave_type:
+  p_sv: true                      # true=P-SV, false=SH/membrane
+  axisym: false                   # true=axisymmetric (2.5D), false=Cartesian (2D)
+
+# ==============================================================================
+# Mesh & Partitioning Parameters
+# ==============================================================================
+mesh:
+  partitioning_type: 3            # 3=SCOTCH, 1=ascending order
+  ngnod: 4                        # number of control nodes per element (4 or 9)
+  setup_with_binary_database: 0   # 0=no, 1=create, 2=read
+  model: "default"
+  save_model: "default"
+  read_external_mesh: true        # true=use external mesh, false=use internal mesher
+
+# ==============================================================================
+# Attenuation Parameters
+# ==============================================================================
+attenuation:
+  attenuation_viscoelastic: false
+  attenuation_viscoacoustic: false
+  n_sls: 3
+  attenuation_f0_reference: 5.196
+  read_velocities_at_f0: false
+  use_solvopt: false
+  attenuation_poro_fluid_part: false
+  q0_poroelastic: 1
+  freq0_poroelastic: 10
+  undo_attenuation_and_or_pml: false
+  nt_dump_attenuation: 100
+  no_backward_reconstruction: false
+  attenuation_permittivity: false
+  attenuation_conductivity: false
+  f0_electromagnetic: 1000
+
+# ==============================================================================
+# Source Parameters
+# ==============================================================================
+sources:
+  nsources: 1
+  force_normal_to_surface: false
+  initialfield: false
+  add_bielak_conditions_bottom: false
+  add_bielak_conditions_right: false
+  add_bielak_conditions_top: false
+  add_bielak_conditions_left: false
+  acoustic_forcing: false
+  noise_source_time_function_type: 4  # 0-4 types available
+  write_moving_sources_database: false
+
+# ==============================================================================
+# Receiver Parameters
+# ==============================================================================
+receivers:
+  seismotype: 4                   # 1=displ, 2=veloc, 3=accel, 4=pressure, 5=curl of displ, 6=fluid potential
+  ntstep_between_output_seismos: 200
+  ntstep_between_output_sample: 1
+  use_trick_for_better_pressure: false
+  user_t0: 0.0
+  save_ascii_seismograms: true
+  save_binary_seismograms_single: true
+  save_binary_seismograms_double: false
+  su_format: false
+  use_existing_stations: false
+  nreceiversets: 1
+  anglerec: 0.0
+  rec_normal_to_surface: false
+  # Receiver set 1
+  nrec: 25                       # number of receivers
+  xdeb: 1.0                      # first receiver x
+  zdeb: 0.5                      # first receiver z
+  xfin: 25.0                     # last receiver x
+  zfin: 0.5                      # last receiver z
+  record_at_surface_same_vertical: false
+
+# ==============================================================================
+# Kernel & Boundary Condition Parameters
+# ==============================================================================
+kernels:
+  save_ascii_kernels: true
+  ntstep_between_compute_kernels: 1
+  approximate_hess_kl: false
+
+# ==============================================================================
+# PML Boundary Conditions
+# ==============================================================================
+pml:
+  pml_boundary_conditions: false
+  nelem_pml_thickness: 1
+  rotate_pml_activate: false
+  rotate_pml_angle: 30.0
+  k_min_pml: 1.0
+  k_max_pml: 1.0
+  damping_change_factor_acoustic: 0.5
+  damping_change_factor_elastic: 1.0
+  pml_parameter_adjustment: false
+
+# ==============================================================================
+# Stacey & Periodic Boundary Conditions
+# ==============================================================================
+boundary_conditions:
+  stacey_absorbing_conditions: true
+  add_periodic_conditions: false
+  periodic_horiz_dist: 30.0
+
+# ==============================================================================
+# Velocity Model Parameters
+# ==============================================================================
+velocity_model:
+  nbmodels: 2
+  tomography_file: "dummy"
+  # Model definitions: [model_number, rho, Vp, Vs, ...]
+  models:
+    - [1, 1, 1000.0, 1500.0, 0.0, 0, 0, 9999, 9999, 0, 0, 0, 0, 0, 0]
+    - [2, 1, 1200.0, 1700.0, 200.0, 0, 0, 9999, 9999, 0, 0, 0, 0, 0, 0]
+
+# ==============================================================================
+# External Mesh Files
+# ==============================================================================
+external_mesh:
+  mesh_file: "MESH/Mesh_model_01"
+  nodes_coords_file: "MESH/Nodes_model_01"
+  materials_file: "MESH/Material_model_01"
+  free_surface_file: "MESH/Surf_free_model_01"
+  axial_elements_file: "dummy"
+  absorbing_surface_file: "MESH/Surf_abs_model_01"
+  acoustic_forcing_surface_file: "dummy"
+  absorbing_cpml_file: "dummy"
+  tangential_detection_curve_file: "dummy"
+
+# ==============================================================================
+# Internal Mesh Parameters
+# ==============================================================================
+internal_mesh:
+  interfacesfile: "dummy"
+  xmin: 0.0
+  xmax: 4000.0
+  nx: 100                         # number of elements along X
+  # Absorbing boundaries
+  absorbbottom: true
+  absorbright: true
+  absorbtop: false
+  absorbleft: true
+  # Mesh regions
+  nbregions: 1
+  # Format: nxmin nxmax nzmin nzmax material_number
+  regions:
+    - [1, 100, 1, 60, 1]
+
+# ==============================================================================
+# Display & Output Parameters
+# ==============================================================================
+display:
+  ntstep_between_output_info: 200
+  output_grid_gnuplot: false
+  output_grid_ascii: true
+  output_energy: false
+  ntstep_between_output_energy: 200
+  compute_integrated_energy_field: false
+
+# ==============================================================================
+# Image/Snapshot Parameters
+# ==============================================================================
+snapshots:
+  ntstep_between_output_images: 200
+  cutsnaps: 1.0
+  output_color_image: true
+  imagetype_jpeg: 10              # 1-10 types available
+  factor_subsample_image: 1.0
+  use_constant_max_amplitude: false
+  constant_max_amplitude_to_use: 1.17e4
+  power_display_color: 0.30
+  draw_sources_and_receivers: true
+  draw_water_in_blue: true
+  use_snapshot_number_in_filename: false
+
+# ==============================================================================
+# PostScript Snapshot Parameters
+# ==============================================================================
+postscript:
+  output_postscript_snapshot: false
+  imagetype_postscript: 1
+  meshvect: true
+  modelvect: false
+  boundvect: true
+  interpol: true
+  pointsdisp: 6
+  subsamp_postscript: 1
+  sizemax_arrows: 1.0
+  us_letter: false
+
+# ==============================================================================
+# Wavefield Dump Parameters
+# ==============================================================================
+wavefield:
+  output_wavefield_dumps: false
+  imagetype_wavefield_dumps: 2
+  use_binary_for_wavefield_dumps: false
+
+# ==============================================================================
+# Parallel & GPU Parameters
+# ==============================================================================
+parallel:
+  number_of_simultaneous_runs: 1
+  broadcast_same_mesh_and_model: true
+  gpu_mode: false

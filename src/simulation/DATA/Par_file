@@ -1,0 +1,206 @@
+#-----------------------------------------------------------
+# Simulation input parameters
+#-----------------------------------------------------------
+
+# title of job
+title                           = Test model for JIPSENSE
+
+# forward or adjoint simulation
+# 1 = forward, 2 = adjoint, 3 = both simultaneously
+SIMULATION_TYPE                 = 1
+NOISE_TOMOGRAPHY                = 0
+SAVE_FORWARD                    = .false.
+
+# parameters concerning partitioning
+NPROC                           = 1              # number of processes
+
+# time step parameters
+NSTEP                           = 500
+DT                              = 1.1800000000d-05
+time_stepping_scheme            = 1
+
+# set the type of calculation (P-SV or SH/membrane waves)
+P_SV                            = .true.
+
+# axisymmetric (2.5D) or Cartesian planar (2D) simulation
+AXISYM                          = .false.
+
+#-----------------------------------------------------------
+# Mesh and Material Properties
+#-----------------------------------------------------------
+
+PARTITIONING_TYPE               = 3
+NGNOD                           = 4
+setup_with_binary_database      = 0
+MODEL                           = default
+SAVE_MODEL                      = default
+read_external_mesh              = .true.
+
+#-----------------------------------------------------------
+# Attenuation
+#-----------------------------------------------------------
+
+ATTENUATION_VISCOELASTIC        = .false.
+ATTENUATION_VISCOACOUSTIC       = .false.
+N_SLS                           = 3
+ATTENUATION_f0_REFERENCE        = 5.1960000000d+00
+READ_VELOCITIES_AT_f0           = .false.
+USE_SOLVOPT                     = .false.
+ATTENUATION_PORO_FLUID_PART     = .false.
+Q0_poroelastic                  = 1
+freq0_poroelastic               = 10
+UNDO_ATTENUATION_AND_OR_PML     = .false.
+NT_DUMP_ATTENUATION             = 100
+NO_BACKWARD_RECONSTRUCTION      = .false.
+ATTENUATION_PERMITTIVITY        = .false.
+ATTENUATION_CONDUCTIVITY        = .false.
+f0_electromagnetic              = 1000
+
+#-----------------------------------------------------------
+# Sources and Receivers
+#-----------------------------------------------------------
+
+NSOURCES                        = 1
+force_normal_to_surface         = .false.
+initialfield                    = .false.
+add_Bielak_conditions_bottom    = .false.
+add_Bielak_conditions_right     = .false.
+add_Bielak_conditions_top       = .false.
+add_Bielak_conditions_left      = .false.
+ACOUSTIC_FORCING                = .false.
+noise_source_time_function_type = 4
+write_moving_sources_database   = .false.
+
+# Receivers
+seismotype                      = 4
+NTSTEP_BETWEEN_OUTPUT_SEISMOS   = 200
+NTSTEP_BETWEEN_OUTPUT_SAMPLE    = 1
+USE_TRICK_FOR_BETTER_PRESSURE   = .false.
+USER_T0                         = 0.d0
+save_ASCII_seismograms          = .true.
+save_binary_seismograms_single  = .true.
+save_binary_seismograms_double  = .false.
+SU_FORMAT                       = .false.
+use_existing_STATIONS           = .false.
+nreceiversets                   = 1
+anglerec                        = 0.d0
+rec_normal_to_surface           = .false.
+nrec                            = 25
+xdeb                            = 1.d0
+zdeb                            = 5.0000000000d-01
+xfin                            = 25.d0
+zfin                            = 5.0000000000d-01
+record_at_surface_same_vertical = .false.
+
+#-----------------------------------------------------------
+# Kernels and Boundary Conditions
+#-----------------------------------------------------------
+
+save_ASCII_kernels              = .true.
+NTSTEP_BETWEEN_COMPUTE_KERNELS  = 1
+APPROXIMATE_HESS_KL             = .false.
+
+# PML
+PML_BOUNDARY_CONDITIONS         = .false.
+NELEM_PML_THICKNESS             = 1
+ROTATE_PML_ACTIVATE             = .false.
+ROTATE_PML_ANGLE                = 30.d0
+K_MIN_PML                       = 1.d0
+K_MAX_PML                       = 1.d0
+damping_change_factor_acoustic  = 5.0000000000d-01
+damping_change_factor_elastic   = 1.d0
+PML_PARAMETER_ADJUSTMENT        = .false.
+
+# Stacey and Periodic
+STACEY_ABSORBING_CONDITIONS     = .true.
+ADD_PERIODIC_CONDITIONS         = .false.
+PERIODIC_HORIZ_DIST             = 30.d0
+
+#-----------------------------------------------------------
+# Velocity and Density Models
+#-----------------------------------------------------------
+
+nbmodels                        = 2
+1 1 1000.0 1500.0 0.0 0 0 9999 9999 0 0 0 0 0 0
+2 1 1200.0 1700.0 200.0 0 0 9999 9999 0 0 0 0 0 0
+TOMOGRAPHY_FILE                 = dummy
+
+#-----------------------------------------------------------
+# External Mesh Files
+#-----------------------------------------------------------
+
+mesh_file                       = MESH/Mesh_model_01
+nodes_coords_file               = MESH/Nodes_model_01
+materials_file                  = MESH/Material_model_01
+free_surface_file               = MESH/Surf_free_model_01
+axial_elements_file             = dummy
+absorbing_surface_file          = MESH/Surf_abs_model_01
+acoustic_forcing_surface_file   = dummy
+absorbing_cpml_file             = dummy
+tangential_detection_curve_file = dummy
+
+#-----------------------------------------------------------
+# Internal Mesh
+#-----------------------------------------------------------
+
+interfacesfile                  = dummy
+xmin                            = 0.d0
+xmax                            = 4000.d0
+nx                              = 100
+
+absorbbottom                    = .true.
+absorbright                     = .true.
+absorbtop                       = .false.
+absorbleft                      = .true.
+
+nbregions                       = 1
+1 100 1 60 1
+
+#-----------------------------------------------------------
+# Display and Output
+#-----------------------------------------------------------
+
+NTSTEP_BETWEEN_OUTPUT_INFO      = 200
+output_grid_Gnuplot             = .false.
+output_grid_ASCII               = .true.
+OUTPUT_ENERGY                   = .false.
+NTSTEP_BETWEEN_OUTPUT_ENERGY    = 200
+COMPUTE_INTEGRATED_ENERGY_FIELD = .false.
+
+# Snapshots
+NTSTEP_BETWEEN_OUTPUT_IMAGES    = 200
+cutsnaps                        = 1.d0
+output_color_image              = .true.
+imagetype_JPEG                  = 10
+factor_subsample_image          = 1.d0
+USE_CONSTANT_MAX_AMPLITUDE      = .false.
+CONSTANT_MAX_AMPLITUDE_TO_USE   = 1.17e4
+POWER_DISPLAY_COLOR             = 3.0000000000d-01
+DRAW_SOURCES_AND_RECEIVERS      = .true.
+DRAW_WATER_IN_BLUE              = .true.
+USE_SNAPSHOT_NUMBER_IN_FILENAME = .false.
+
+# PostScript
+output_postscript_snapshot      = .false.
+imagetype_postscript            = 1
+meshvect                        = .true.
+modelvect                       = .false.
+boundvect                       = .true.
+interpol                        = .true.
+pointsdisp                      = 6
+subsamp_postscript              = 1
+sizemax_arrows                  = 1.d0
+US_LETTER                       = .false.
+
+# Wavefield dumps
+output_wavefield_dumps          = .false.
+imagetype_wavefield_dumps       = 2
+use_binary_for_wavefield_dumps  = .false.
+
+#-----------------------------------------------------------
+# Parallel & GPU
+#-----------------------------------------------------------
+
+NUMBER_OF_SIMULTANEOUS_RUNS     = 1
+BROADCAST_SAME_MESH_AND_MODEL   = .true.
+GPU_MODE                        = .false.
