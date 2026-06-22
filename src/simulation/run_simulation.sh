@@ -7,6 +7,9 @@
 echo "running example: `date`"
 currentdir=`pwd`
 
+# Capture timestamp for output folder
+timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
+
 # sets up directory structure in current example directoy
 echo
 echo "setting up example..."
@@ -84,8 +87,14 @@ EOF
 # checks exit code
 if [[ $? -ne 0 ]]; then exit 1; fi
 
+# Move OUTPUT_FILES to output directory with timestamp
+output_dir="../../data/output"
+mkdir -p "$output_dir"
+timestamped_output="${output_dir}/OUTPUT_FILES_${timestamp}"
+mv OUTPUT_FILES "$timestamped_output"
+
 echo
-echo "see results in directory: OUTPUT_FILES/"
+echo "see results in directory: ${timestamped_output}/"
 echo
 echo "done"
 echo `date`

@@ -42,6 +42,13 @@ data/meshes/*
 !data/output/.gitkeep
 !data/meshes/.gitkeep
 
+# Simulation outputs
+src/simulation/OUTPUT_FILES/
+src/simulation/bin/
+src/simulation/DATA/
+*.mesh
+*.msh
+
 # OS
 .DS_Store
 Thumbs.db

@@ -16,7 +16,7 @@ NPROC                           = 1              # number of processes
 
 # time step parameters
 NSTEP                           = 500
-DT                              = 1.1800000000d-05
+DT                              = 2.0400000000d-06
 time_stepping_scheme            = 1
 
 # set the type of calculation (P-SV or SH/membrane waves)
