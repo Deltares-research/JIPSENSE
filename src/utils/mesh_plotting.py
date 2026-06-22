@@ -430,3 +430,202 @@ def plot_mesh(msh_file: Path, output_file: Path = None, stats_file: Path = None,
         material_names=material_names,
         show_plot=True
     )
+
+
+def parse_source_file(source_file: Path) -> Optional[Dict]:
+    """
+    Parse SPECFEM2D SOURCE file to extract source position.
+    
+    Args:
+        source_file: Path to SOURCE file
+        
+    Returns:
+        Dictionary with 'x' and 'z' positions, or None if parsing fails
+    """
+    try:
+        with open(source_file, 'r') as f:
+            content = f.read()
+        
+        source_data = {}
+        
+        # Extract xs (x position)
+        for line in content.split('\n'):
+            if 'xs' in line and '=' in line and not line.strip().startswith('#'):
+                parts = line.split('=')
+                try:
+                    # Convert Fortran notation (d+/-00) to Python notation (e+/-00)
+                    value_str = parts[1].split('#')[0].strip().replace('d', 'e')
+                    xs = float(value_str)
+                    source_data['x'] = xs
+                except (ValueError, IndexError):
+                    pass
+            
+            # Extract zs (z position)
+            if 'zs' in line and '=' in line and not line.strip().startswith('#'):
+                parts = line.split('=')
+                try:
+                    # Convert Fortran notation (d+/-00) to Python notation (e+/-00)
+                    value_str = parts[1].split('#')[0].strip().replace('d', 'e')
+                    zs = float(value_str)
+                    source_data['z'] = zs
+                except (ValueError, IndexError):
+                    pass
+        
+        return source_data if ('x' in source_data and 'z' in source_data) else None
+    
+    except Exception as e:
+        print(f"Error parsing SOURCE file: {e}")
+        return None
+
+
+def parse_stations_file(stations_file: Path) -> List[Dict]:
+    """
+    Parse SPECFEM2D STATIONS file to extract receiver positions.
+    
+    Format: StationName Network X Z Elevation Depth
+    
+    Args:
+        stations_file: Path to STATIONS file
+        
+    Returns:
+        List of dictionaries with 'name', 'x', 'z' for each station
+    """
+    stations = []
+    
+    try:
+        with open(stations_file, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                
+                parts = line.split()
+                if len(parts) >= 4:
+                    try:
+                        station = {
+                            'name': parts[0],
+                            'network': parts[1],
+                            'x': float(parts[2]),
+                            'z': float(parts[3])
+                        }
+                        stations.append(station)
+                    except (ValueError, IndexError):
+                        pass
+    
+    except Exception as e:
+        print(f"Error parsing STATIONS file: {e}")
+    
+    return stations
+
+
+def plot_geometry_with_sources_receivers(
+        mesh_file: Path,
+        source_file: Optional[Path] = None,
+        stations_file: Optional[Path] = None,
+        output_file: Optional[Path] = None,
+        title: str = 'Geometry with Sources and Receivers',
+        material_names: Optional[Dict[int, str]] = None,
+        material_colors: Optional[Dict[int, str]] = None,
+        figsize: Tuple = (14, 6),
+        show_plot: bool = True) -> Dict:
+    """
+    Plot mesh geometry with source(s) and receiver positions overlaid.
+    
+    Args:
+        mesh_file: Path to .msh file
+        source_file: Optional path to SOURCE file
+        stations_file: Optional path to STATIONS file
+        output_file: Optional path to save figure (PNG)
+        title: Plot title
+        material_names: Custom material names {material_id: name}
+        material_colors: Custom material colors {material_id: hex_color}
+        figsize: Figure size (width, height)
+        show_plot: Whether to display plot
+        
+    Returns:
+        Dictionary with mesh statistics
+    """
+    # Read mesh
+    mesh_data = read_msh_file(mesh_file)
+    nodes = mesh_data['nodes']
+    elements = mesh_data['elements']
+    
+    # Calculate statistics
+    stats = get_mesh_stats(mesh_data)
+    
+    # Generate color and name maps
+    mat_ids = list(elements.keys())
+    colors = create_color_map(mat_ids, material_colors)
+    names = create_material_names(mat_ids, material_names)
+    
+    # Create figure
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    # Plot elements by material
+    for material_id, elem_list in sorted(elements.items()):
+        patches = []
+        for elem in elem_list:
+            coords = [nodes[nid][:2] for nid in elem]
+            patches.append(Polygon(coords))
+        
+        pc = PatchCollection(patches, facecolor=colors.get(material_id, '#CCCCCC'),
+                            edgecolor='darkgray', linewidth=0.3, alpha=0.85)
+        ax.add_collection(pc)
+    
+    # Plot nodes (very subtle)
+    node_coords = np.array([nodes[nid][:2] for nid in sorted(nodes.keys())])
+    ax.scatter(node_coords[:, 0], node_coords[:, 1], s=1, c='black', alpha=0.1)
+    
+    # Parse and plot source(s)
+    source_data = None
+    if source_file and source_file.exists():
+        source_data = parse_source_file(source_file)
+        if source_data:
+            ax.plot(source_data['x'], source_data['z'], 'r*', markersize=30, 
+                   label='Source', zorder=10, markeredgecolor='darkred', markeredgewidth=1.5)
+    
+    # Parse and plot receivers
+    receivers = []
+    if stations_file and stations_file.exists():
+        receivers = parse_stations_file(stations_file)
+        if receivers:
+            rx_coords = np.array([[s['x'], s['z']] for s in receivers])
+            ax.scatter(rx_coords[:, 0], rx_coords[:, 1], c='green', s=50, 
+                      marker='^', label='Receivers', zorder=4, alpha=0.8)
+    
+    # Axis configuration
+    ax.set_aspect('equal')
+    ax.autoscale()
+    ax.set_xlabel('x (m)')
+    ax.set_ylabel('z (m)')
+    ax.set_title(title, fontsize=14, fontweight='bold')
+    ax.grid(True, alpha=0.3)
+    
+    # Legend - combine material patches with source/receiver markers
+    legend_elements = [Patch(facecolor=colors.get(mat, '#CCCCCC'), edgecolor='black',
+                            label=names.get(mat, f'Material {mat}'))
+                      for mat in sorted(elements.keys())]
+    
+    if source_data:
+        from matplotlib.lines import Line2D
+        legend_elements.append(Line2D([0], [0], marker='*', color='w', 
+                                     markerfacecolor='r', markersize=15, label='Source'))
+    
+    if receivers:
+        from matplotlib.lines import Line2D
+        legend_elements.append(Line2D([0], [0], marker='^', color='w', 
+                                     markerfacecolor='g', markersize=10, label='Receivers'))
+    
+    ax.legend(handles=legend_elements, loc='upper right')
+    
+    plt.tight_layout()
+    
+    # Save if requested
+    if output_file:
+        plt.savefig(output_file, dpi=150, bbox_inches='tight')
+        print(f"✓ Geometry plot saved: {output_file}")
+    
+    if show_plot:
+        plt.show()
+    
+    return stats
