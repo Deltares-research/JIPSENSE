@@ -18,7 +18,7 @@ simulation:
 # Time Step Parameters
 # ==============================================================================
 time_parameters:
-  nstep: 500                      # total number of time steps
+  nstep: 100000                      # total number of time steps
   dt: 2.04e-6                     # duration of a time step
   time_stepping_scheme: 1         # 1=Newmark, 2=LDDRK4-6, 3=classical RK4
 

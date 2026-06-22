@@ -15,7 +15,7 @@ SAVE_FORWARD                    = .false.
 NPROC                           = 1              # number of processes
 
 # time step parameters
-NSTEP                           = 500
+NSTEP                           = 100000
 DT                              = 2.0400000000d-06
 time_stepping_scheme            = 1
 

@@ -38,12 +38,13 @@ env/
 
 # Data - ignore large binary files but keep geometry and visualizations
 data/meshes/**/*.msh
-#data/meshes/**/*.json
-#!data/meshes/**/*.geo
-#!data/meshes/**/*.png
+data/meshes/**/*.json
+!data/meshes/**/*.geo
+!data/meshes/**/*.png
 data/output/**/*
 !data/output/**/*.png
 data/output/.gitkeep
+data/output/h5/.gitkeep
 data/meshes/.gitkeep
 
 # Simulation outputs
