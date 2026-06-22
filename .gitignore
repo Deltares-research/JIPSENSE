@@ -36,15 +36,15 @@ env/
 .ipynb_checkpoints/
 *.ipynb
 
-# Data (keep directories but ignore large files)
-data/output/*
-data/meshes/*
-!data/output/.gitkeep
-!data/meshes/.gitkeep
-# Keep geometry and visualization files
-!data/meshes/*.geo
-!data/meshes/*.png
-!data/output/*.png
+# Data - ignore large binary files but keep geometry and visualizations
+data/meshes/**/*.msh
+#data/meshes/**/*.json
+#!data/meshes/**/*.geo
+#!data/meshes/**/*.png
+data/output/**/*
+!data/output/**/*.png
+data/output/.gitkeep
+data/meshes/.gitkeep
 
 # Simulation outputs
 src/simulation/OUTPUT_FILES/
