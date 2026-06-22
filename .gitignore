@@ -41,6 +41,10 @@ data/output/*
 data/meshes/*
 !data/output/.gitkeep
 !data/meshes/.gitkeep
+# Keep geometry and visualization files
+!data/meshes/*.geo
+!data/meshes/*.png
+!data/output/*.png
 
 # Simulation outputs
 src/simulation/OUTPUT_FILES/
