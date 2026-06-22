@@ -15,7 +15,7 @@ SAVE_FORWARD                    = .false.
 NPROC                           = 1              # number of processes
 
 # time step parameters
-NSTEP                           = 100000
+NSTEP                           = 15000
 DT                              = 2.0400000000d-06
 time_stepping_scheme            = 1
 
@@ -101,7 +101,7 @@ NTSTEP_BETWEEN_COMPUTE_KERNELS  = 1
 APPROXIMATE_HESS_KL             = .false.
 
 # PML
-PML_BOUNDARY_CONDITIONS         = .false.
+PML_BOUNDARY_CONDITIONS         = .true.
 NELEM_PML_THICKNESS             = 1
 ROTATE_PML_ACTIVATE             = .false.
 ROTATE_PML_ANGLE                = 30.d0
@@ -112,7 +112,7 @@ damping_change_factor_elastic   = 1.d0
 PML_PARAMETER_ADJUSTMENT        = .false.
 
 # Stacey and Periodic
-STACEY_ABSORBING_CONDITIONS     = .true.
+STACEY_ABSORBING_CONDITIONS     = .false.
 ADD_PERIODIC_CONDITIONS         = .false.
 PERIODIC_HORIZ_DIST             = 30.d0
 
@@ -132,11 +132,12 @@ TOMOGRAPHY_FILE                 = dummy
 mesh_file                       = MESH/Mesh_model_01
 nodes_coords_file               = MESH/Nodes_model_01
 materials_file                  = MESH/Material_model_01
+nummaterial_velocity_file       = MESH/nummaterial_velocity_file        # file containing the material properties for each material
 free_surface_file               = MESH/Surf_free_model_01
 axial_elements_file             = dummy
 absorbing_surface_file          = MESH/Surf_abs_model_01
 acoustic_forcing_surface_file   = dummy
-absorbing_cpml_file             = dummy
+absorbing_cpml_file             = ./MESH/EltPML_model_01                      # file containing the CPML element numbers
 tangential_detection_curve_file = dummy
 
 #-----------------------------------------------------------
