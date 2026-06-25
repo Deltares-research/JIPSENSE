@@ -15,8 +15,8 @@ SAVE_FORWARD                    = .false.
 NPROC                           = 1              # number of processes
 
 # time step parameters
-NSTEP                           = 15000
-DT                              = 2.0400000000d-06
+NSTEP                           = 50000
+DT                              = 1.300000000d-06
 time_stepping_scheme            = 1
 
 # set the type of calculation (P-SV or SH/membrane waves)
@@ -121,8 +121,9 @@ PERIODIC_HORIZ_DIST             = 30.d0
 #-----------------------------------------------------------
 
 nbmodels                        = 2
-1 1 1000.0 1500.0 0.0 0 0 9999 9999 0 0 0 0 0 0
-2 1 1200.0 1700.0 200.0 0 0 9999 9999 0 0 0 0 0 0
+1 1 1900.0 1750.0 300.0 0 0 9999 9999 0 0 0 0 0 0
+2 1 1700.0 1600.0 200.0 0 0 9999 9999 0 0 0 0 0 0
+
 TOMOGRAPHY_FILE                 = dummy
 
 #-----------------------------------------------------------
@@ -162,6 +163,7 @@ nbregions                       = 1
 #-----------------------------------------------------------
 
 NTSTEP_BETWEEN_OUTPUT_INFO      = 200
+SAVE_MESH_FILES                 = .true.
 output_grid_Gnuplot             = .false.
 output_grid_ASCII               = .true.
 OUTPUT_ENERGY                   = .false.
