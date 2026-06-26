@@ -33,8 +33,8 @@ env/
 *~
 
 # Jupyter
-.ipynb_checkpoints/
-*.ipynb
+#.ipynb_checkpoints/
+#*.ipynb
 
 # Data - ignore large binary files but keep geometry and visualizations
 data/meshes/**/*.msh
