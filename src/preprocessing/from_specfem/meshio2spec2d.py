@@ -111,8 +111,8 @@ def write_str_surface(cells_line, cells_quad, bound_edges, _node_ids, flag_abs):
             # If no break occurred, continue to the next iteration
             continue
 
-        # specfem requires only 2 two edge nodes
-        out_str = f"{ielm} 2 {node_0} {node_1}"
+        # SPECFEM files use 1-based indices
+        out_str = f"{ielm + 1} 2 {node_0 + 1} {node_1 + 1}"
 
         if flag_abs is not None:
             out_str += f" {flag_abs}"
@@ -239,10 +239,12 @@ class Meshio2Specfem2D:
             cell_data = self.mesh.cells_dict[self.key_quad] # id starts from 0
             self.n_cells = len(cell_data)
             f.write(str(self.n_cells) + "\n")
+            # SPECFEM expects 1-based node numbering in element connectivity.
+            cell_data_specfem = cell_data + 1
             if self.if_second_order:
-                np.savetxt(f, cell_data[:,0:9], fmt="%d %d %d %d %d %d %d %d %d")
+                np.savetxt(f, cell_data_specfem[:,0:9], fmt="%d %d %d %d %d %d %d %d %d")
             else:
-                np.savetxt(f, cell_data[:,0:4], fmt="%d %d %d %d")
+                np.savetxt(f, cell_data_specfem[:,0:4], fmt="%d %d %d %d")
 
 
     def write_material(self):
@@ -456,6 +458,10 @@ class Meshio2Specfem2D:
             self.write_cpml()
             t_end_cpml = time.time()
             print("Time elapsed for cpml: ", t_end_cpml - t_start_cpml, " seconds")
+        elif os.path.exists(self.fname_CPML):
+            # Avoid stale CPML data from a previous mesh generation.
+            os.remove(self.fname_CPML)
+            print("Removed stale CPML file:", self.fname_CPML)
 
         print("Time elapsed: ", time.time() - start_time, " seconds")
 

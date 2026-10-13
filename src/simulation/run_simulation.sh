@@ -61,7 +61,7 @@ if [ "$NPROC" -eq 1 ]; then
   echo
   echo "running solver..."
   echo
-  ./bin/xspecfem2D
+  ./bin/xspecfem2D 2>&1 | tee run_simulation.log
 else
   # This is a MPI simulation
   echo
@@ -75,13 +75,13 @@ if [[ $? -ne 0 ]]; then exit 1; fi
 # stores output
 cp DATA/*SOURCE* DATA/*STATIONS* OUTPUT_FILES
 
-# check mesh
+# check mesh. Save a log of the mesh quality
 cd bin/
 rm -f xcheck_quality_external_mesh
 ln -s /home/obandohe/specfem2d/bin/xcheck_quality_external_mesh
 cd ../
 
-./bin/xcheck_quality_external_mesh <<EOF
+./bin/xcheck_quality_external_mesh <<EOF | tee mesh_quality.log
 3
 EOF
 # checks exit code
@@ -92,6 +92,8 @@ output_dir="../../data/output"
 mkdir -p "$output_dir"
 timestamped_output="${output_dir}/OUTPUT_FILES_${timestamp}"
 mv OUTPUT_FILES "$timestamped_output"
+mv run_simulation.log "$timestamped_output/"
+mv mesh_quality.log "$timestamped_output/"
 
 echo
 echo "see results in directory: ${timestamped_output}/"

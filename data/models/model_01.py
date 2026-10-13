@@ -8,6 +8,7 @@ This is modified for a 3 layers case, following the description by SPECFEM examp
 import pygmsh
 import numpy as np
 from meshio2spec2d import *
+from pathlib import Path
 
 # Configuration
 use_cpml = True
@@ -15,29 +16,25 @@ use_cpml = True
 # Initialize empty geometry using the built-in kernel in GMSH
 with pygmsh.geo.Geometry() as model:
 
+
+    # H_g = (H - H_w)  # subsurface depth in meter
+    H_layer1 = 1.0 # layer1 depth in meter
+    H_layer2 = 1.5 # layer2 depth in meter
+    H_w = 0.5      # water depth in meter
+
     # Define global parameters
-    H = 3.0  # domain height in meter
+    H = H_layer1 + H_layer2 + H_w
     L = 30.0  # domain width in meter
 
-    # H_w = 2.5  # water depth in meter
-    # H_g = (H - H_w)  # subsurface depth in meter
-    H_layer1 = 0.50  # layer1 depth in meter
-    H_layer2 = 0.25  # layer2 depth in meter
-
-    H_w = H - (H_layer1 + H_layer2)  # water depth in meter
-
     # Element size for both water and subsurface domain
-    # lc_w = 0.09375 * 1000
-    # lc_g = 0.075 * 1000
-
-    # Test size
-    lc_w = 0.15
-    lc_g = 0.15
+    lc_w = 0.10 #0.25
+    lc_lyr1 = 0.10 #0.15
+    lc_lyr2 = 0.10 #0.10
 
     if use_cpml:
         # PML layer thickness
-        n_elm_pml = 6
-        pml = lc_g * n_elm_pml
+        n_elm_pml = 90
+        pml = lc_w * n_elm_pml # use water element size for PML thickness
 
     top_pml = False
 
@@ -59,43 +56,40 @@ with pygmsh.geo.Geometry() as model:
 
     19  18            17  16 <--- top_pml = True
 
-    20   O            O   15
+    20   7            8   15
                 w
-    21   O            O   14
-
-              layer1
-
-    22   O            0   13
+    21   5            6   14
 
               layer2
 
-    23   O            O    12
+    22   3            4   13
+
+              layer1
+
+    23   1            2    12
 
     24   9            10   11
     """
 
     # All points within the domain. No PML layer
-    p1 = model.add_point((0, 0, 0), lc_g)
-    p2 = model.add_point((L, 0, 0), lc_g)
-
-    p3 = model.add_point((L, H_layer1, 0), lc_g)
-    p4 = model.add_point((0, H_layer1, 0), lc_g)
-
-    p5 = model.add_point((0, H_layer1 + H_layer2, 0), lc_g)
-    p6 = model.add_point((L, H_layer1 + H_layer2, 0), lc_g)
-
-    p7 = model.add_point((L, H, 0), lc_w)
-    p8 = model.add_point((0, H, 0), lc_w)
+    p1 = model.add_point((0, 0, 0), lc_lyr1)
+    p2 = model.add_point((L, 0, 0), lc_lyr1)
+    p3 = model.add_point((0, H_layer1, 0), lc_lyr2)
+    p4 = model.add_point((L, H_layer1, 0), lc_lyr2)
+    p5 = model.add_point((0, H_layer1 + H_layer2, 0), lc_lyr2)
+    p6 = model.add_point((L, H_layer1 + H_layer2, 0), lc_lyr2)
+    p7 = model.add_point((0, H, 0), lc_w)
+    p8 = model.add_point((L, H, 0), lc_w)
+    
 
     # Points for pml layer outside the domain
     if use_cpml:
-        p9 = model.add_point((0, -pml, 0), lc_g)
-        p10 = model.add_point((L, -pml, 0), lc_g)
-        p11 = model.add_point((L + pml, -pml, 0), lc_g)
-        p12 = model.add_point((L + pml, 0, 0), lc_g)
-
-        p13 = model.add_point((L + pml, H_layer1, 0), lc_g)
-        p14 = model.add_point((L + pml, H_layer1 + H_layer2, 0), lc_w)
+        p9 = model.add_point((0, -pml, 0), lc_lyr1)
+        p10 = model.add_point((L, -pml, 0), lc_lyr1)
+        p11 = model.add_point((L + pml, -pml, 0), lc_lyr1)
+        p12 = model.add_point((L + pml, 0, 0), lc_lyr1)
+        p13 = model.add_point((L + pml, H_layer1, 0), lc_lyr1)
+        p14 = model.add_point((L + pml, H_layer1 + H_layer2, 0), lc_lyr2)
         p15 = model.add_point((L + pml, H, 0), lc_w)
 
         if top_pml:
@@ -104,18 +98,18 @@ with pygmsh.geo.Geometry() as model:
             p18 = model.add_point((0, H + pml, 0), lc_w)
             p19 = model.add_point((-pml, H + pml, 0), lc_w)
 
-        p20 = model.add_point((-pml, H, 0), lc_g)
-        p21 = model.add_point((-pml, H_layer1 + H_layer2, 0), lc_g)
-        p22 = model.add_point((-pml, H_layer1, 0), lc_g)
-        p23 = model.add_point((-pml, 0, 0), lc_g)
-        p24 = model.add_point((-pml, -pml, 0), lc_g)
+        p20 = model.add_point((-pml, H, 0), lc_w)
+        p21 = model.add_point((-pml, H_layer1 + H_layer2, 0), lc_lyr2)
+        p22 = model.add_point((-pml, H_layer1, 0), lc_lyr2)
+        p23 = model.add_point((-pml, 0, 0), lc_lyr1)
+        p24 = model.add_point((-pml, -pml, 0), lc_lyr1)
 
     # --------------------Assembling lines--------------------------------
 
     # Bottom line
     l_bot = model.add_line(p1, p2)
-    l_right_layer1 = model.add_line(p2, p3)
-    l_right_layer2 = model.add_line(p3, p6)
+    l_right_layer1 = model.add_line(p2, p4)
+    l_right_layer2 = model.add_line(p4, p6)
 
     # Water/sediment interface
     l_bound_wg = model.add_line(p5, p6)
@@ -124,20 +118,22 @@ with pygmsh.geo.Geometry() as model:
     l_bound_layer = model.add_line(p3, p4)
 
     # Left layer
-    l_left_layer1 = model.add_line(p4, p1)
-    l_left_layer2 = model.add_line(p5, p4)
+    l_left_layer1 = model.add_line(p1, p3)
+    l_left_layer2 = model.add_line(p3, p5)
 
     # Top of water
     l_top = model.add_line(p7, p8)
 
     # Left and right boundaries of water
-    l_right_w = model.add_line(p6, p7)
-    l_left_w = model.add_line(p5, p8)
+    l_right_w = model.add_line(p6, p8)
+    l_left_w = model.add_line(p5, p7)
 
     # -----------------------creating line loop-------------------------------
-    ll_layer1 = model.add_curve_loop([l_bot, l_right_layer1, l_bound_layer, l_left_layer1])
-    ll_layer2 = model.add_curve_loop([-l_bound_layer, l_right_layer2, -l_bound_wg, l_left_layer2])
-    ll_w = model.add_curve_loop([l_bound_wg, l_right_w, l_top, -l_left_w])
+    ll_layer1 = model.add_curve_loop([l_bot, l_right_layer1, -l_bound_layer, -l_left_layer1])
+
+    ll_layer2 = model.add_curve_loop([l_bound_layer, l_right_layer2, -l_bound_wg, -l_left_layer2])
+
+    ll_w = model.add_curve_loop([l_bound_wg, l_right_w, -l_top, -l_left_w])
 
     # ------------------------plane surface--------------------------------
     ps_layer1 = model.add_plane_surface(ll_layer1)
@@ -159,7 +155,7 @@ with pygmsh.geo.Geometry() as model:
         # Left and right lines
         l_r_layer1_pml = model.add_line(p12, p13)
         l_r_layer2_pml = model.add_line(p13, p14)
-        l_r_layer2_layer1_pml = model.add_line(p3, p13)
+        l_r_layer2_layer1_pml = model.add_line(p4, p13)
         l_r_gw_pml = model.add_line(p6, p14)
         l_r_w_pml = model.add_line(p14, p15)
 
@@ -174,14 +170,14 @@ with pygmsh.geo.Geometry() as model:
             l_tr_v2_pml = model.add_line(p7, p17)
             l_tl_v2_pml = model.add_line(p8, p18)
 
-        l_tr_h2_pml = model.add_line(p7, p15)
-        l_tl_h2_pml = model.add_line(p8, p20)
+        l_tr_h2_pml = model.add_line(p8, p15)
+        l_tl_h2_pml = model.add_line(p7, p20)
         l_l_w_pml = model.add_line(p20, p21)
         l_l_gw_pml = model.add_line(p5, p21)
 
         l_l_layer1_pml = model.add_line(p22, p23)
         l_l_layer2_pml = model.add_line(p21, p22)
-        l_l_layer2_layer1_pml = model.add_line(p4, p22)
+        l_l_layer2_layer1_pml = model.add_line(p3, p22)
 
         l_bl_v_pml = model.add_line(p23, p24)
         l_bl_h_pml = model.add_line(p24, p9)
@@ -195,7 +191,9 @@ with pygmsh.geo.Geometry() as model:
         ll_br_pml = model.add_curve_loop([l_br_h_pml, l_br_v_pml, -l_br_h2_pml, l_br_v2_pml])
 
         ll_r_layer1_pml = model.add_curve_loop([l_br_h2_pml, l_r_layer1_pml, -l_r_layer2_layer1_pml, -l_right_layer1])
+
         ll_r_layer2_pml = model.add_curve_loop([l_r_layer2_layer1_pml, l_r_layer2_pml, -l_r_gw_pml, -l_right_layer2])
+
         ll_r_w_pml = model.add_curve_loop([l_r_gw_pml, l_r_w_pml, -l_tr_h2_pml, -l_right_w])
 
         if top_pml:
@@ -205,9 +203,9 @@ with pygmsh.geo.Geometry() as model:
 
         ll_l_w_pml = model.add_curve_loop([l_tl_h2_pml, l_l_w_pml, -l_l_gw_pml, l_left_w])
 
-        ll_l_layer1_pml = model.add_curve_loop([l_l_layer1_pml, -l_bl_h2_pml, -l_left_layer1, l_l_layer2_layer1_pml])
+        ll_l_layer1_pml = model.add_curve_loop([l_l_layer1_pml, -l_bl_h2_pml, l_left_layer1, l_l_layer2_layer1_pml])
 
-        ll_l_layer2_pml = model.add_curve_loop([-l_l_layer2_layer1_pml, -l_left_layer2, l_l_gw_pml, l_l_layer2_pml])
+        ll_l_layer2_pml = model.add_curve_loop([-l_l_layer2_layer1_pml, l_left_layer2, l_l_gw_pml, l_l_layer2_pml])
 
         ll_bl_pml = model.add_curve_loop([l_bl_h2_pml, l_bl_v_pml, l_bl_h_pml, -l_bl_v2_pml])
 
@@ -231,6 +229,10 @@ with pygmsh.geo.Geometry() as model:
 
     # make cpml layer to be transfinite
     if use_cpml:
+        n_elm_layer1 = int(np.round(H_layer1 / min(lc_lyr1, lc_lyr2)))
+        n_elm_layer2 = int(np.round(H_layer2 / lc_lyr2))
+        n_elm_water = int(np.round(H_w / lc_w))
+
         if top_pml:
             model.set_transfinite_curve(l_tl_h_pml, n_elm_pml + 1, "Progression", 1.0)
             model.set_transfinite_curve(l_tr_h_pml, n_elm_pml + 1, "Progression", 1.0)
@@ -239,10 +241,29 @@ with pygmsh.geo.Geometry() as model:
             model.set_transfinite_curve(l_tl_v2_pml, n_elm_pml + 1, "Progression", 1.0)
             model.set_transfinite_curve(l_tr_v2_pml, n_elm_pml + 1, "Progression", 1.0)
 
+
         model.set_transfinite_curve(l_tl_h2_pml, n_elm_pml + 1, "Progression", 1.0)
         model.set_transfinite_curve(l_tr_h2_pml, n_elm_pml + 1, "Progression", 1.0)
+        model.set_transfinite_curve(l_right_layer1, n_elm_layer1 + 1, "Progression", 1.0)
+        model.set_transfinite_curve(l_left_layer1, n_elm_layer1 + 1, "Progression", 1.0)
+        model.set_transfinite_curve(l_r_layer1_pml, n_elm_layer1 + 1, "Progression", 1.0)
+        model.set_transfinite_curve(l_l_layer1_pml, n_elm_layer1 + 1, "Progression", 1.0)
+
+        model.set_transfinite_curve(l_right_layer2, n_elm_layer2 + 1, "Progression", 1.0)
+        model.set_transfinite_curve(l_left_layer2, n_elm_layer2 + 1, "Progression", 1.0)
+        model.set_transfinite_curve(l_r_layer2_pml, n_elm_layer2 + 1, "Progression", 1.0)
+        model.set_transfinite_curve(l_l_layer2_pml, n_elm_layer2 + 1, "Progression", 1.0)
+
+        model.set_transfinite_curve(l_right_w, n_elm_water + 1, "Progression", 1.0)
+        model.set_transfinite_curve(l_left_w, n_elm_water + 1, "Progression", 1.0)
+        model.set_transfinite_curve(l_r_w_pml, n_elm_water + 1, "Progression", 1.0)
+        model.set_transfinite_curve(l_l_w_pml, n_elm_water + 1, "Progression", 1.0)
         model.set_transfinite_curve(l_l_gw_pml, n_elm_pml + 1, "Progression", 1.0)
         model.set_transfinite_curve(l_r_gw_pml, n_elm_pml + 1, "Progression", 1.0)
+        model.set_transfinite_curve(l_l_layer2_layer1_pml, n_elm_pml + 1, "Progression", 1.0)
+        model.set_transfinite_curve(l_r_layer2_layer1_pml, n_elm_pml + 1, "Progression", 1.0)
+
+
         model.set_transfinite_curve(l_bl_h_pml, n_elm_pml + 1, "Progression", 1.0)
         model.set_transfinite_curve(l_br_h_pml, n_elm_pml + 1, "Progression", 1.0)
         model.set_transfinite_curve(l_bl_v_pml, n_elm_pml + 1, "Progression", 1.0)
@@ -252,15 +273,23 @@ with pygmsh.geo.Geometry() as model:
         model.set_transfinite_curve(l_bl_v2_pml, n_elm_pml + 1, "Progression", 1.0)
         model.set_transfinite_curve(l_br_v2_pml, n_elm_pml + 1, "Progression", 1.0)
 
+
+
         model.set_transfinite_surface(ps_bot_pml, "Left", corner_pts=[p1, p9, p10, p2])
         model.set_transfinite_surface(ps_br_pml, "Left", corner_pts=[p2, p10, p11, p12])
-        model.set_transfinite_surface(ps_r_layer1_pml, "Left", corner_pts=[p3, p2, p12, p13])
-        model.set_transfinite_surface(ps_r_layer2_pml, "Left", corner_pts=[p6, p3, p13, p14])
-        model.set_transfinite_surface(ps_r_w_pml, "Left", corner_pts=[p7, p6, p14, p15])
-        model.set_transfinite_surface(ps_l_w_pml, "Left", corner_pts=[p20, p21, p5, p8])
-        model.set_transfinite_surface(ps_l_layer1_pml, "Left", corner_pts=[p22, p23, p1, p4])
-        model.set_transfinite_surface(ps_l_layer2_pml, "Left", corner_pts=[p21, p22, p4, p5])
-        model.set_transfinite_surface(ps_bl_pml, "Left", corner_pts=[p1, p23, p24, p9])
+        model.set_transfinite_surface(ps_r_layer1_pml, "Left", corner_pts=[p4, p2, p12, p13])
+        model.set_transfinite_surface(ps_r_layer2_pml, "Left", corner_pts=[p6, p4, p13, p14])
+
+
+        model.set_transfinite_surface(ps_r_w_pml, "Left", corner_pts=[p8, p6, p14, p15])
+        model.set_transfinite_surface(ps_l_w_pml, "Left", corner_pts=[p20, p21, p5, p7])
+
+
+        model.set_transfinite_surface(ps_l_layer1_pml, "Left", corner_pts=[p22, p23, p1, p3])
+
+        model.set_transfinite_surface(ps_l_layer2_pml, "Left", corner_pts=[p21, p22, p3, p5])
+
+        model.set_transfinite_surface(ps_bl_pml, "Left", corner_pts=[p23, p24, p9, p1])
 
     # recombine surfaces
     if use_cpml:
@@ -275,6 +304,7 @@ with pygmsh.geo.Geometry() as model:
                                            ps_l_w_pml, ps_l_layer1_pml, ps_l_layer2_pml, ps_bl_pml])
 
     else:
+
         model.set_recombined_surfaces([ps_layer1, ps_layer2, ps_w])
 
     # synchronize
@@ -294,27 +324,28 @@ with pygmsh.geo.Geometry() as model:
             pg_right = model.add_physical([l_br_v_pml, l_r_layer1_pml, l_r_layer2_pml, l_r_w_pml, l_tr_v_pml], label="Right")
 
         else:
-            pg_top = model.add_physical([l_top, l_tr_h2_pml, l_tl_h2_pml], label="Top")
-            pg_left = model.add_physical([l_l_w_pml, l_l_layer1_pml, l_l_layer2_pml, l_bl_v_pml], label="Left")
-            pg_right = model.add_physical([l_br_v_pml, l_r_layer1_pml, l_r_layer2_pml, l_r_w_pml], label="Right")
+            pg_top = model.add_physical([l_tl_h2_pml,l_top, l_tr_h2_pml], label="Top")
+            pg_left = model.add_physical([l_l_w_pml, l_l_layer2_pml, l_l_layer1_pml, l_bl_v_pml], label="Left")
+            pg_right = model.add_physical([l_r_w_pml,l_r_layer2_pml, l_r_layer1_pml,l_br_v_pml], label="Right")
 
-        pg_bot = model.add_physical([l_bot_pml, l_br_h_pml, l_bl_h_pml], label="Bottom")
+        pg_bot = model.add_physical([l_bl_h_pml,l_bot_pml, l_br_h_pml], label="Bottom")
 
         # use _* for preparing damping region between PML and main domain
         _pg_top = model.add_physical(l_top, label="_Top")
         _pg_bot = model.add_physical(l_bot, label="_Bottom")
-        _pg_left = model.add_physical([l_left_layer1, l_left_layer2, l_left_w], label="_Left")
-        _pg_right = model.add_physical([l_right_layer1, l_right_layer2, l_right_w], label="_Right")
+        _pg_left = model.add_physical([l_left_w,l_left_layer2, l_left_layer1, ], label="_Left")
+        _pg_right = model.add_physical([l_right_w, l_right_layer2, l_right_layer1], label="_Right")
 
     # material
     if not use_cpml:
+             
         pg_layer1 = model.add_physical(ps_layer1, label="M1")  # subsurface
         pg_layer2 = model.add_physical(ps_layer2, label="M2")  # subsurface
-        pg_w = model.add_physical(ps_w, label="M3")  # water
+        pg_w = model.add_physical(ps_w, label="M3")  # water 
+
     else:
 
         pg_layer1 = model.add_physical([ps_layer1, ps_bot_pml, ps_bl_pml, ps_br_pml, ps_l_layer1_pml, ps_r_layer1_pml], label="M1")
-
         pg_layer2 = model.add_physical([ps_layer2, ps_l_layer2_pml, ps_r_layer2_pml], label="M2")
 
         if top_pml:
@@ -334,16 +365,15 @@ with pygmsh.geo.Geometry() as model:
     # Generate mesh (meshio object)
     # mesh algorithm can be specified by an integer here.
     # details: https://gitlab.onelab.info/gmsh/gmsh/-/blob/master/src/common/GmshDefines.h#L238
-    mesh = model.generate_mesh(dim=2, order=2, verbose=True, algorithm=6)
+    mesh = model.generate_mesh(dim=2, order=1, verbose=True, algorithm=6)
 
 # Write mesh files
 mesh.write("mesh.xdmf", file_format='xdmf')
-mesh.write("mesh.msh", file_format='gmsh22')
+#mesh.write("mesh.msh", file_format='gmsh22')
 
 # Convert to SPECFEM2D format
 mio2spec = Meshio2Specfem2D(mesh)
 mio2spec.write("model_01")
-
 # Write material velocity file
 """
 Format:
@@ -378,14 +408,16 @@ Format:
 
 fname = "/home/obandohe/JIPSENSE/JIPSENSE/src/simulation/MESH/nummaterial_velocity_file"
 
-# M1: subsurface
-M1_params = "2 1 1850.d0 1900.d0 300.d0 9999 9999 0"
 
-# M2: layer2
-M2_params = "2 2 1700.d0 1500.d0 180.d0 9999 9999 0"
+# M1: layer1 (sand)
+M1_params = "2 1 1900.d0 1800.d0 400.d0 9999 9999 0"
+
+# M2: sediment (layer2)
+M2_params = "2 2 1700.d0 1550.d0 100.d0 9999 9999 0"
 
 # M3: water
 M3_params = "1 3 1000.d0 1500.d0 0.d0 9999 9999 0"
+
 
 with open(fname, "w") as f:
     f.write(M1_params + "\n")

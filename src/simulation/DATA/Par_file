@@ -15,8 +15,8 @@ SAVE_FORWARD                    = .false.
 NPROC                           = 1              # number of processes
 
 # time step parameters
-NSTEP                           = 50000
-DT                              = 1.300000000d-06
+NSTEP                           = 500
+DT                              =2.55d-06
 time_stepping_scheme            = 1
 
 # set the type of calculation (P-SV or SH/membrane waves)
@@ -72,7 +72,7 @@ noise_source_time_function_type = 4
 write_moving_sources_database   = .false.
 
 # Receivers
-seismotype                      = 4
+seismotype                      = 2,4
 NTSTEP_BETWEEN_OUTPUT_SEISMOS   = 200
 NTSTEP_BETWEEN_OUTPUT_SAMPLE    = 1
 USE_TRICK_FOR_BETTER_PRESSURE   = .false.
@@ -85,11 +85,11 @@ use_existing_STATIONS           = .false.
 nreceiversets                   = 1
 anglerec                        = 0.d0
 rec_normal_to_surface           = .false.
-nrec                            = 25
-xdeb                            = 1.d0
-zdeb                            = 5.0000000000d-01
-xfin                            = 25.d0
-zfin                            = 5.0000000000d-01
+nrec                            = 115
+xdeb                            = 1.0
+zdeb                            = 0.98
+xfin                            = 29.5
+zfin                            = 0.98
 record_at_surface_same_vertical = .false.
 
 #-----------------------------------------------------------
@@ -120,9 +120,13 @@ PERIODIC_HORIZ_DIST             = 30.d0
 # Velocity and Density Models
 #-----------------------------------------------------------
 
-nbmodels                        = 2
-1 1 1900.0 1750.0 300.0 0 0 9999 9999 0 0 0 0 0 0
-2 1 1700.0 1600.0 200.0 0 0 9999 9999 0 0 0 0 0 0
+nbmodels                        = 3
+#1 1 1900.0 1750.0 300.0 0 0 9999 9999 0 0 0 0 0 0
+#2 1 1700.0 1600.0 200.0 0 0 9999 9999 0 0 0 0 0 0
+
+1 1 1850.d0 1900.d0 300.d0 9999 9999 0 0 0 0 0 0
+2 1 1700.d0 1600.d0 180.d0 9999 9999 0 0 0 0 0 0
+3 1 1000.d0 1500.d0 0.d0 9999 9999 0 0 0 0 0 0
 
 TOMOGRAPHY_FILE                 = dummy
 
@@ -162,16 +166,16 @@ nbregions                       = 1
 # Display and Output
 #-----------------------------------------------------------
 
-NTSTEP_BETWEEN_OUTPUT_INFO      = 200
+NTSTEP_BETWEEN_OUTPUT_INFO      = 1000
 SAVE_MESH_FILES                 = .true.
 output_grid_Gnuplot             = .false.
 output_grid_ASCII               = .true.
 OUTPUT_ENERGY                   = .false.
-NTSTEP_BETWEEN_OUTPUT_ENERGY    = 200
+NTSTEP_BETWEEN_OUTPUT_ENERGY    = 1000
 COMPUTE_INTEGRATED_ENERGY_FIELD = .false.
 
 # Snapshots
-NTSTEP_BETWEEN_OUTPUT_IMAGES    = 200
+NTSTEP_BETWEEN_OUTPUT_IMAGES    = 1000
 cutsnaps                        = 1.d0
 output_color_image              = .true.
 imagetype_JPEG                  = 10

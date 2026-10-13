@@ -11,7 +11,7 @@ import h5py
 from .mesh_plotting import parse_source_file, parse_stations_file
 
 
-def read_semp_file(semp_file: Path) -> Tuple[np.ndarray, np.ndarray, float]:
+def read_trace_file(semp_file: Path) -> Tuple[np.ndarray, np.ndarray, float]:
     """
     Read a SPECFEM2D seismic trace file (.semp format).
     
@@ -49,7 +49,7 @@ def read_semp_file(semp_file: Path) -> Tuple[np.ndarray, np.ndarray, float]:
         return None, None, None
 
 
-def read_all_traces(output_dir: Path, network: str = 'AA', 
+def read_all_traces_pressure(output_dir: Path, network: str = 'AA', 
                     component: str = 'PRE') -> Dict[str, Dict]:
     """
     Read all seismic traces from a simulation output directory.
@@ -80,7 +80,7 @@ def read_all_traces(output_dir: Path, network: str = 'AA',
         # Extract station name from filename (e.g., AA.S0001.PRE.semp -> S0001)
         station_id = semp_file.stem.split('.')[1]  # Get 'S0001' from filename
         
-        time, pressure, dt = read_semp_file(semp_file)
+        time, pressure, dt = read_trace_file(semp_file)
         
         if time is not None:
             traces[station_id] = {
@@ -92,6 +92,101 @@ def read_all_traces(output_dir: Path, network: str = 'AA',
             print(f"  ✓ {station_id}: {len(time)} samples, dt={dt:.6f}s")
     
     return traces
+
+
+def read_all_traces_XX(output_dir: Path, network: str = 'AA',
+                    component: str = 'XX',trace_type: str = 'semv') -> Dict[str, Dict]:
+    traces = {}
+    
+    # Find all matching files
+    pattern = f"{network}.S*.{component}.{trace_type}"
+    signal_files = sorted(output_dir.glob(pattern))
+    
+    print(f"Found {len(signal_files)} trace files matching {pattern}")
+    
+    for signal_file in signal_files:
+        # Extract station name from filename (e.g., AA.S0001.XX.semv -> S0001)
+        station_id = signal_file.stem.split('.')[1]  # Get 'S0001' from filename
+        
+        time, signal, dt = read_trace_file(signal_file)
+
+        if trace_type == 'semv':
+            # For velocity traces, convert to pressure using a simple scaling factor
+            # This is a placeholder; in practice, use proper conversion based on medium properties
+            trace_name = 'velocity'
+
+        elif trace_type == 'semd':
+            # For displacement traces, convert to pressure using a simple scaling factor
+            trace_name = 'displacement'
+
+        elif trace_type == 'sema':
+            # For acceleration traces, convert to pressure using a simple scaling factor
+            trace_name = 'acceleration'
+
+        else:
+            trace_name = 'unknown'
+
+            print('trace name is uknown')
+        
+        if time is not None:
+            traces[station_id] = {
+                'time': time,
+                trace_name: signal,
+                'dt': dt,
+                'num_samples': len(time)
+            }
+            print(f"  ✓ {station_id}: {len(time)} samples, dt={dt:.6f}s")
+    
+    return traces
+
+
+# the same for XZ
+def read_all_traces_XZ(output_dir: Path, network: str = 'AA',
+                    component: str = 'XZ',trace_type: str = 'semv') -> Dict[str, Dict]:
+    traces = {}
+    
+    # Find all matching files
+    pattern = f"{network}.S*.{component}.{trace_type}"
+    signal_files = sorted(output_dir.glob(pattern))
+    
+    print(f"Found {len(signal_files)} trace files matching {pattern}")
+    
+    for signal_file in signal_files:
+        # Extract station name from filename (e.g., AA.S0001.XX.semv -> S0001)
+        station_id = signal_file.stem.split('.')[1]  # Get 'S0001' from filename
+        
+        time, signal, dt = read_trace_file(signal_file)
+
+        if trace_type == 'semv':
+            # For velocity traces, convert to pressure using a simple scaling factor
+            # This is a placeholder; in practice, use proper conversion based on medium properties
+            trace_name = 'velocity'
+
+        elif trace_type == 'semd':
+            # For displacement traces, convert to pressure using a simple scaling factor
+            trace_name = 'displacement'
+
+        elif trace_type == 'sema':
+            # For acceleration traces, convert to pressure using a simple scaling factor
+            trace_name = 'acceleration'
+
+        else:
+            trace_name = 'unknown'
+
+            print('trace name is uknown')
+        
+        if time is not None:
+            traces[station_id] = {
+                'time': time,
+                trace_name: signal,
+                'trace_name':trace_name,
+                'dt': dt,
+                'num_samples': len(time)
+            }
+            print(f"  ✓ {station_id}: {len(time)} samples, dt={dt:.6f}s")
+    
+    return traces
+
 
 
 def save_traces_to_hdf5(traces: Dict, output_file: Path,
@@ -110,7 +205,7 @@ def save_traces_to_hdf5(traces: Dict, output_file: Path,
     - /receivers/{station_id}: Receiver x, z coordinates
     
     Args:
-        traces: Dictionary from read_all_traces()
+        traces: Dictionary from read_all_traces_pressure()
         output_file: Path to output .h5 file
         source_file: Optional path to SOURCE file for metadata
         stations_file: Optional path to STATIONS file for receiver geometry

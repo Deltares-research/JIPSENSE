@@ -1,7 +1,7 @@
 ## Source 1
 source_surf                     = .false.
-xs                              = 5.
-zs                              = 2.8000000000d+00
+xs                              = 0.5
+zs                              = 2.5d0
 ## Source type parameters:
 #  1 = elastic force or acoustic pressure
 #  2 = moment tensor
@@ -39,7 +39,7 @@ time_function_type              = 1
 # IMPORTANT: do NOT put quote signs around the file name, just put the file name itself otherwise the run will stop
 name_of_source_file             = YYYYYYYYYYYYYYYYYY
 burst_band_width                = 0.
-f0                              = 200.
+f0                              = 250.
 tshift                          = 0.
 ## Force source
 # angle of the source (for a force only); for a plane wave, this is the incidence angle; for moment tensor sources this is unused
@@ -50,7 +50,7 @@ Mxx                             = 1.
 Mzz                             = 1.
 Mxz                             = 0.
 ## Amplification (factor to amplify source time function)
-factor                          = 1.0e10
+factor                          = 1.0
 ## Moving source parameters
 vx                              = 0.
 vz                              = 0.

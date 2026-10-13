@@ -7,9 +7,17 @@ computes dt, and saves to HDF5 with source and receiver geometry metadata.
 
 from pathlib import Path
 import sys
+import os
 
-# Add src to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add src to path - robust path resolution
+try:
+    # Try using __file__ if available (direct execution)
+    project_root = Path(__file__).parent.parent
+except:
+    # Fall back to current working directory (interactive/notebook context)
+    project_root = Path(os.getcwd())
+
+sys.path.insert(0, str(project_root))
 
 from src.utils.seismic_io import (
     read_all_traces, save_traces_to_hdf5, load_traces_from_hdf5, print_hdf5_info
@@ -19,13 +27,27 @@ from src.utils.seismic_io import (
 def main():
     """Read seismic traces from simulation output and save to HDF5."""
     
-    # Define paths
-    project_root = Path(__file__).parent.parent
-    data_dir = project_root / "src/simulation/DATA"
+    # Define paths - robust resolution
+    try:
+        project_root = Path(__file__).parent.parent
+    except:
+        project_root = Path(os.getcwd())
     
-    # Find the latest OUTPUT_FILES folder
-    output_base = project_root / "data/output"
-    output_folders = sorted([f for f in output_base.glob("OUTPUT_FILES_*") if f.is_dir()], reverse=True)
+    # Check for both simulation and simulation_standard directories
+    sim_dirs = [
+        project_root / "src/simulation/DATA",
+    ]
+    data_dir = next((d for d in sim_dirs if d.exists()), sim_dirs[0])
+    
+    # Find the latest OUTPUT_FILES folder - check both locations
+    output_bases = [project_root / "data/output"]
+
+    output_folders = []
+    for output_base in output_bases:
+        if output_base.exists():
+            output_folders.extend(sorted([f for f in output_base.glob("OUTPUT_FILES_*") if f.is_dir()], reverse=True))
+    
+    output_folders = sorted(set(output_folders), reverse=True)
     
     if not output_folders:
         print("❌ No OUTPUT_FILES found. Please run simulation first.")
